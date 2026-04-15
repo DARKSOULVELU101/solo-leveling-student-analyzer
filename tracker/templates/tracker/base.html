@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Solo Leveling — Student Analytics{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'tracker/game.css' %}">
+  <style>
+    /* Minimal Bootstrap-compat utilities */
+    .d-flex { display: flex !important; }
+    .align-items-center { align-items: center !important; }
+    .justify-content-between { justify-content: space-between !important; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-3 { gap: 0.75rem; }
+    .mb-0 { margin-bottom: 0; }
+    .mb-1 { margin-bottom: 0.25rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mb-3 { margin-bottom: 1rem; }
+    .mb-4 { margin-bottom: 1.5rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-3 { margin-top: 1rem; }
+    .mt-4 { margin-top: 1.5rem; }
+    .ms-auto { margin-left: auto; }
+    .me-2 { margin-right: 0.5rem; }
+    .p-0 { padding: 0; }
+    .w-100 { width: 100%; }
+    .text-center { text-align: center; }
+    .text-end { text-align: right; }
+    .fw-bold { font-weight: 700; }
+    .small { font-size: 0.85rem; }
+    .row { display: grid; gap: 1rem; }
+    .col-12 { }
+    .d-none { display: none; }
+    .flex-wrap { flex-wrap: wrap; }
+    .overflow-hidden { overflow: hidden; }
+    table { width: 100%; }
+    .form-text { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .errorlist { list-style: none; padding: 0; color: var(--danger); font-size: 0.85rem; margin-top: 0.25rem; }
+    .messages-container { margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+
+{% if request.session.nickname %}
+<nav class="navbar-game">
+  <div class="container-game" style="padding-top:0;padding-bottom:0;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
+    <a href="{% url 'dashboard' %}" class="navbar-brand-game">⚔️ Solo Leveling</a>
+    <div style="display:flex;align-items:center;gap:0.25rem;flex-wrap:wrap;">
+      <a href="{% url 'dashboard' %}" class="nav-link-game {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">🏠 Home</a>
+      <a href="{% url 'add_marks' %}" class="nav-link-game {% if request.resolver_match.url_name == 'add_marks' %}active{% endif %}">➕ Marks</a>
+      <a href="{% url 'marks_list' %}" class="nav-link-game {% if request.resolver_match.url_name == 'marks_list' %}active{% endif %}">📋 Records</a>
+      <a href="{% url 'analytics' %}" class="nav-link-game {% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">📊 Analytics</a>
+      <a href="{% url 'notes' %}" class="nav-link-game {% if request.resolver_match.url_name == 'notes' %}active{% endif %}">📝 Notes</a>
+      <a href="{% url 'reminders' %}" class="nav-link-game {% if request.resolver_match.url_name == 'reminders' %}active{% endif %}">⏰ Reminders</a>
+      <a href="{% url 'leaderboard' %}" class="nav-link-game {% if request.resolver_match.url_name == 'leaderboard' %}active{% endif %}">🏆 Ranks</a>
+    </div>
+    <div class="ms-auto" style="display:flex;align-items:center;gap:0.75rem;">
+      <span class="player-badge">{{ request.session.nickname }}</span>
+      <a href="{% url 'logout' %}" class="nav-link-game" style="font-size:0.8rem;">Exit</a>
+    </div>
+  </div>
+</nav>
+{% endif %}
+
+<div class="messages-container" style="max-width:1200px;margin:0 auto;padding: {% if request.session.nickname %}0.75rem 1.5rem 0{% else %}0{% endif %};">
+  {% for message in messages %}
+    <div class="alert-game alert-{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}warning{% else %}info{% endif %}-game fade-in">
+      {{ message }}
+    </div>
+  {% endfor %}
+</div>
+
+{% block content %}{% endblock %}
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

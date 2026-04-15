@@ -1,0 +1,48 @@
+{% extends 'tracker/base.html' %}
+{% block title %}Enter the Gate — Solo Leveling{% endblock %}
+
+{% block content %}
+<div class="register-page">
+  <div class="register-box slide-up">
+    <div class="register-logo">⚔️</div>
+    <h1 class="register-logo" style="font-size:1.8rem;margin-bottom:0.25rem;">SOLO LEVELING</h1>
+    <p class="register-subtitle">Student Analytics Platform</p>
+
+    <div style="margin-bottom:2rem;padding:1rem;background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.15);border-radius:10px;">
+      <p style="color:var(--text-muted);font-size:0.85rem;line-height:1.6;">
+        🌌 You have been selected to enter the Gate.<br>
+        Enter your Hunter name to begin your ascent from <strong style="color:var(--gold)">E-Rank</strong> to <strong style="color:var(--gold)">S-Rank</strong>.
+      </p>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div style="margin-bottom:1.25rem;text-align:left;">
+        <label class="form-label-game">{{ form.nickname.label }}</label>
+        {{ form.nickname }}
+        {% if form.nickname.errors %}
+          <ul class="errorlist">{% for e in form.nickname.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+      <button type="submit" class="btn-game w-100" style="justify-content:center;padding:0.8rem;">
+        ⚔️ Enter the Gate
+      </button>
+    </form>
+
+    <div style="margin-top:2rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;">
+      {% for rank, label, color in ranks %}
+      <div style="text-align:center;padding:0.5rem;border:1px solid rgba(255,255,255,0.05);border-radius:8px;">
+        <span class="rank-badge rank-{{ rank }}" style="width:40px;height:40px;font-size:1rem;margin:0 auto;">{{ rank }}</span>
+        <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.3rem;">{{ label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Add rank display data
+</script>
+{% endblock %}
+{% endblock %}

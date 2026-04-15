@@ -1,0 +1,25 @@
+{% extends 'tracker/base.html' %}
+{% block title %}Edit Note — Solo Leveling{% endblock %}
+
+{% block content %}
+<div class="container-game fade-in" style="max-width:680px;">
+  <h1 class="page-title">✏️ Edit Note</h1>
+
+  <div class="game-card">
+    <form method="post">
+      {% csrf_token %}
+      {% for field in form %}
+      <div style="margin-bottom:1rem;">
+        <label class="form-label-game">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}<ul class="errorlist">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+      {% endfor %}
+      <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+        <button type="submit" class="btn-game">💾 Save Changes</button>
+        <a href="{% url 'notes' %}" class="btn-game-outline">← Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

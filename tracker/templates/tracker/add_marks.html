@@ -1,0 +1,107 @@
+{% extends 'tracker/base.html' %}
+{% block title %}Add Marks — Solo Leveling{% endblock %}
+
+{% block content %}
+<div class="container-game fade-in" style="max-width:680px;">
+  <h1 class="page-title">➕ Record New Marks</h1>
+
+  <div class="game-card">
+    <div style="background:rgba(255,215,0,0.05);border:1px solid rgba(255,215,0,0.15);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1.5rem;font-size:0.85rem;color:var(--text-muted);">
+      💡 Each entry earns XP based on your score. Score 100% = 1000 XP!
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+        <div style="grid-column:1/-1;">
+          <label class="form-label-game">{{ form.subject.label }}</label>
+          {{ form.subject }}
+          {% if form.subject.errors %}<ul class="errorlist">{% for e in form.subject.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        <div>
+          <label class="form-label-game">{{ form.marks_obtained.label }}</label>
+          {{ form.marks_obtained }}
+          {% if form.marks_obtained.errors %}<ul class="errorlist">{% for e in form.marks_obtained.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        <div>
+          <label class="form-label-game">{{ form.total_marks.label }}</label>
+          {{ form.total_marks }}
+          {% if form.total_marks.errors %}<ul class="errorlist">{% for e in form.total_marks.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        <div style="grid-column:1/-1;">
+          <label class="form-label-game">{{ form.topic.label }}</label>
+          {{ form.topic }}
+        </div>
+      </div>
+
+      {% if form.non_field_errors %}
+        {% for e in form.non_field_errors %}
+        <div class="alert-game alert-warning-game mb-3">⚠️ {{ e }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <!-- Live Preview -->
+      <div id="preview" style="display:none;background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:8px;padding:1rem;margin-bottom:1.25rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:var(--text-muted);font-size:0.85rem;">Estimated Score</span>
+          <div>
+            <span id="previewPct" style="font-family:var(--font-display);font-size:1.4rem;color:var(--gold);"></span>
+            <span id="previewGrade" class="grade-badge" style="margin-left:0.5rem;"></span>
+          </div>
+        </div>
+        <div style="margin-top:0.5rem;">
+          <span style="color:var(--text-muted);font-size:0.8rem;">XP Reward: </span>
+          <span id="previewXP" style="color:var(--neon-green);font-weight:700;"></span>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-game w-100" style="justify-content:center;padding:0.8rem;">
+        ⚔️ Record Marks & Earn XP
+      </button>
+    </form>
+  </div>
+
+  <div style="margin-top:1rem;">
+    <a href="{% url 'dashboard' %}" class="btn-game-outline">← Back to Dashboard</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const obtainedInput = document.querySelector('[name="marks_obtained"]');
+const totalInput = document.querySelector('[name="total_marks"]');
+const preview = document.getElementById('preview');
+const previewPct = document.getElementById('previewPct');
+const previewGrade = document.getElementById('previewGrade');
+const previewXP = document.getElementById('previewXP');
+
+function getGrade(pct) {
+  if (pct >= 90) return ['A+', 'Aplus'];
+  if (pct >= 80) return ['A', 'A'];
+  if (pct >= 70) return ['B', 'B'];
+  if (pct >= 60) return ['C', 'C'];
+  if (pct >= 40) return ['D', 'D'];
+  return ['F', 'F'];
+}
+
+function updatePreview() {
+  const obt = parseFloat(obtainedInput.value);
+  const tot = parseFloat(totalInput.value);
+  if (!isNaN(obt) && !isNaN(tot) && tot > 0 && obt <= tot) {
+    const pct = (obt / tot) * 100;
+    const [grade, cls] = getGrade(pct);
+    previewPct.textContent = pct.toFixed(1) + '%';
+    previewGrade.textContent = grade;
+    previewGrade.className = 'grade-badge grade-' + cls;
+    previewXP.textContent = '+' + Math.floor(pct * 10) + ' XP';
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+obtainedInput.addEventListener('input', updatePreview);
+totalInput.addEventListener('input', updatePreview);
+</script>
+{% endblock %}

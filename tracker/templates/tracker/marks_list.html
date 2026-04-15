@@ -1,0 +1,71 @@
+{% extends 'tracker/base.html' %}
+{% block title %}Marks Records — Solo Leveling{% endblock %}
+
+{% block content %}
+<div class="container-game fade-in">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+    <h1 class="page-title mb-0">📋 Marks Records</h1>
+    <a href="{% url 'add_marks' %}" class="btn-game">➕ Add New Entry</a>
+  </div>
+
+  <!-- Filter -->
+  <div class="game-card mb-4" style="padding:1rem 1.5rem;">
+    <form method="get" style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+      <label class="form-label-game mb-0" style="white-space:nowrap;">Filter by Subject:</label>
+      <input type="text" name="subject" value="{{ subject_filter }}" placeholder="Type subject name..." class="game-input" style="max-width:260px;">
+      <button type="submit" class="btn-game-outline">🔍 Filter</button>
+      {% if subject_filter %}<a href="{% url 'marks_list' %}" class="btn-danger-game">✕ Clear</a>{% endif %}
+    </form>
+  </div>
+
+  {% if marks %}
+  <div class="game-card" style="padding:0;overflow-x:auto;">
+    <table class="game-table">
+      <thead>
+        <tr>
+          <th>Subject</th>
+          <th>Score</th>
+          <th>Percentage</th>
+          <th>Grade</th>
+          <th>XP Earned</th>
+          <th>Topic</th>
+          <th>Date</th>
+          <th>Suggestion</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in marks %}
+        <tr>
+          <td><strong>{{ m.subject }}</strong></td>
+          <td>{{ m.marks_obtained }}/{{ m.total_marks }}</td>
+          <td>
+            <span style="color:{% if m.percentage >= 80 %}var(--neon-green){% elif m.percentage >= 60 %}var(--gold){% else %}var(--danger){% endif %};font-weight:700;">
+              {{ m.percentage|floatformat:1 }}%
+            </span>
+          </td>
+          <td><span class="grade-badge grade-{% if m.grade == 'A+' %}Aplus{% else %}{{ m.grade }}{% endif %}">{{ m.grade }}</span></td>
+          <td style="color:var(--neon-green);font-weight:700;">+{{ m.xp_earned }}</td>
+          <td style="color:var(--text-muted);font-size:0.85rem;">{{ m.topic|default:"—" }}</td>
+          <td style="color:var(--text-muted);font-size:0.82rem;">{{ m.date_added|date:"M d, Y" }}</td>
+          <td style="font-size:0.82rem;max-width:260px;">
+            <details>
+              <summary style="cursor:pointer;color:var(--neon-blue);font-size:0.8rem;">View tip</summary>
+              <div class="suggestion-box" style="margin-top:0.5rem;font-size:0.82rem;">{{ m.suggestion }}</div>
+            </details>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="game-card">
+    <div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <p>{% if subject_filter %}No records found for "{{ subject_filter }}"{% else %}No marks recorded yet{% endif %}.</p>
+      <a href="{% url 'add_marks' %}" class="btn-game mt-3">➕ Record First Marks</a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'tracker/base.html' %}
+{% block title %}Leaderboard — Solo Leveling{% endblock %}
+
+{% block content %}
+<div class="container-game fade-in" style="max-width:780px;">
+  <h1 class="page-title">🏆 Hunter Leaderboard</h1>
+
+  <div class="game-card mb-4" style="text-align:center;padding:1rem 1.5rem;">
+    <p style="color:var(--text-muted);font-size:0.9rem;">
+      Top 10 Hunters ranked by Level &amp; XP. Rise through the ranks to claim the S-Rank throne!
+    </p>
+  </div>
+
+  {% if players %}
+    {% for p in players %}
+    {% with forloop.counter as pos %}
+    <div class="lb-row {% if pos == 1 %}lb-top1{% elif pos == 2 %}lb-top2{% elif pos == 3 %}lb-top3{% endif %} {% if p.nickname == student.nickname %}glow-gold{% endif %}">
+
+      <!-- Position -->
+      <div class="lb-position">
+        {% if pos == 1 %}👑
+        {% elif pos == 2 %}🥈
+        {% elif pos == 3 %}🥉
+        {% else %}<span style="color:var(--text-muted);font-size:1rem;">#{{ pos }}</span>
+        {% endif %}
+      </div>
+
+      <!-- Rank Badge -->
+      <div class="rank-badge rank-{{ p.get_rank }}" style="width:42px;height:42px;font-size:1rem;flex-shrink:0;">{{ p.get_rank }}</div>
+
+      <!-- Name & Info -->
+      <div class="lb-name">
+        {{ p.nickname }}
+        {% if p.nickname == student.nickname %}
+          <span style="background:rgba(255,215,0,0.15);color:var(--gold);border:1px solid rgba(255,215,0,0.3);font-size:0.7rem;padding:0.1rem 0.4rem;border-radius:4px;margin-left:0.4rem;font-family:var(--font-body);font-weight:700;">YOU</span>
+        {% endif %}
+        <div class="lb-level">{{ p.get_rank_display_full }} · 🔥 {{ p.streak }} streak</div>
+      </div>
+
+      <!-- Level -->
+      <div style="text-align:center;min-width:60px;">
+        <div style="font-family:var(--font-display);font-size:1.1rem;color:var(--text-primary);">Lv.{{ p.level }}</div>
+        <div style="font-size:0.72rem;color:var(--text-muted);">Level</div>
+      </div>
+
+      <!-- XP -->
+      <div class="lb-xp" style="min-width:80px;text-align:right;">
+        {{ p.xp }} XP
+      </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  {% else %}
+    <div class="game-card">
+      <div class="empty-state">
+        <div class="empty-icon">🏆</div>
+        <p>No hunters yet. Be the first to rise!</p>
+      </div>
+    </div>
+  {% endif %}
+
+  <div style="margin-top:1.5rem;text-align:center;">
+    <a href="{% url 'dashboard' %}" class="btn-game-outline">← Back to Dashboard</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,170 @@
+{% extends 'tracker/base.html' %}
+{% block title %}Dashboard — Solo Leveling{% endblock %}
+
+{% block content %}
+<div class="container-game fade-in">
+
+  <!-- Level-Up Modal -->
+  {% if leveled_up %}
+  <div class="levelup-overlay" id="levelupModal">
+    <div class="levelup-box">
+      <div style="font-size:4rem;">🌟</div>
+      <h2 class="levelup-title">LEVEL UP!</h2>
+      <p style="color:var(--text-muted);margin-bottom:1rem;">You've grown stronger, Hunter!</p>
+      <div class="rank-badge rank-{{ new_rank }} rank-badge-lg" style="margin:0 auto 1rem;">{{ new_rank }}</div>
+      <p style="color:var(--gold);font-family:var(--font-display);font-size:1.1rem;">{{ student.get_rank_display_full }}</p>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-top:0.5rem;">Level {{ student.level }} Achieved</p>
+      <button class="btn-game mt-4 w-100" style="justify-content:center;" onclick="document.getElementById('levelupModal').remove()">
+        ⚔️ Continue Quest
+      </button>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Player Header -->
+  <div class="game-card mb-4" style="display:grid;grid-template-columns:auto 1fr auto;gap:1.5rem;align-items:center;">
+    <div class="rank-badge rank-{{ rank }} rank-badge-lg">{{ rank }}</div>
+    <div>
+      <h2 style="font-family:var(--font-display);font-size:1.4rem;color:var(--text-primary);margin-bottom:0.25rem;">
+        {{ student.nickname }}
+      </h2>
+      <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:0.75rem;">
+        {{ student.get_rank_display_full }} &nbsp;·&nbsp; Level {{ student.level }}
+        &nbsp;·&nbsp; <span class="streak-badge">🔥 {{ student.streak }} Day Streak</span>
+      </p>
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <div style="flex:1;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;">
+            <span style="font-size:0.75rem;color:var(--text-muted);">XP PROGRESS</span>
+            <span style="font-size:0.75rem;color:var(--gold);">{{ xp_in_level }} / {{ xp_needed }}</span>
+          </div>
+          <div class="xp-bar-container">
+            <div class="xp-bar-fill" style="width:{{ student.get_xp_progress_percent }}%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:right;">
+      <div class="stat-value" style="font-size:2.5rem;">{{ student.xp }}</div>
+      <div class="stat-label">Total XP</div>
+      <div style="margin-top:0.5rem;">
+        <a href="{% url 'export_excel' %}" class="btn-game-outline" style="font-size:0.75rem;padding:0.3rem 0.8rem;">
+          📥 Export
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="dashboard-grid mb-4">
+    <div class="stat-card">
+      <span class="stat-value">{{ overall_avg }}%</span>
+      <div class="stat-label">Overall Average</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ student.level }}</span>
+      <div class="stat-label">Current Level</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ student.streak }}🔥</span>
+      <div class="stat-label">Day Streak</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ student.xp }}</span>
+      <div class="stat-label">Total XP</div>
+    </div>
+  </div>
+
+  <!-- Subject Performance -->
+  {% if subject_avgs %}
+  <div class="game-card mb-4">
+    <h3 class="card-title-game">📊 Subject Performance</h3>
+    {% for s in subject_avgs %}
+    <div style="margin-bottom:0.75rem;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;">
+        <span style="font-weight:600;font-size:0.9rem;">{{ s.subject }}</span>
+        <span style="color:{% if s.avg >= 80 %}var(--neon-green){% elif s.avg >= 60 %}var(--gold){% else %}var(--danger){% endif %};font-weight:700;font-size:0.9rem;">{{ s.avg|floatformat:1 }}%</span>
+      </div>
+      <div class="pct-bar">
+        <div class="pct-fill {% if s.avg >= 80 %}high{% elif s.avg >= 60 %}medium{% else %}low{% endif %}" style="width:{{ s.avg }}%;"></div>
+      </div>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.2rem;">{{ s.count }} record{{ s.count|pluralize }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="content-grid">
+    <!-- Recent Marks -->
+    <div class="game-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <h3 class="card-title-game mb-0">⚔️ Recent Marks</h3>
+        <a href="{% url 'add_marks' %}" class="btn-game" style="font-size:0.78rem;padding:0.35rem 0.9rem;">+ Add</a>
+      </div>
+      {% if recent_marks %}
+        {% for m in recent_marks %}
+        <div style="padding:0.75rem 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-weight:600;font-size:0.9rem;">{{ m.subject }}</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);">{{ m.marks_obtained }}/{{ m.total_marks }} · {{ m.date_added|date:"M d" }}</div>
+          </div>
+          <div style="text-align:right;">
+            <span class="grade-badge grade-{% if m.grade == 'A+' %}Aplus{% else %}{{ m.grade }}{% endif %}">{{ m.grade }}</span>
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.2rem;">+{{ m.xp_earned }} XP</div>
+          </div>
+        </div>
+        {% endfor %}
+        <div style="margin-top:0.75rem;">
+          <a href="{% url 'marks_list' %}" class="btn-game-outline" style="font-size:0.8rem;">View All Records →</a>
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <p>No marks recorded yet.<br>Begin your quest!</p>
+          <a href="{% url 'add_marks' %}" class="btn-game mt-3" style="font-size:0.85rem;">➕ Add First Entry</a>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Upcoming Reminders & Notes -->
+    <div>
+      <div class="game-card mb-3">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <h3 class="card-title-game mb-0">⏰ Upcoming Reminders</h3>
+          <a href="{% url 'reminders' %}" class="btn-game-outline" style="font-size:0.75rem;padding:0.3rem 0.7rem;">+ Add</a>
+        </div>
+        {% if upcoming_reminders %}
+          {% for r in upcoming_reminders %}
+          <div class="reminder-card">
+            <div style="flex:1;">
+              <div style="font-weight:600;font-size:0.9rem;">{{ r.title }}</div>
+              <div class="reminder-time">{{ r.remind_at|date:"M d, Y · H:i" }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p style="color:var(--text-muted);font-size:0.85rem;">No upcoming reminders.</p>
+        {% endif %}
+      </div>
+
+      <div class="game-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <h3 class="card-title-game mb-0">📝 Recent Notes</h3>
+          <a href="{% url 'notes' %}" class="btn-game-outline" style="font-size:0.75rem;padding:0.3rem 0.7rem;">+ Add</a>
+        </div>
+        {% if recent_notes %}
+          {% for n in recent_notes %}
+          <div style="padding:0.6rem 0;border-bottom:1px solid var(--border);">
+            <div style="font-weight:600;font-size:0.9rem;">{{ n.title }}</div>
+            <div style="font-size:0.78rem;color:var(--text-muted);">{{ n.subject }} · {{ n.created_at|date:"M d" }}</div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p style="color:var(--text-muted);font-size:0.85rem;">No notes yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

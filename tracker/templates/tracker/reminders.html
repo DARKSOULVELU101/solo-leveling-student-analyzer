@@ -1,0 +1,81 @@
+{% extends 'tracker/base.html' %}
+{% block title %}Reminders — Solo Leveling{% endblock %}
+
+{% block content %}
+<div class="container-game fade-in">
+  <h1 class="page-title">⏰ Reminders</h1>
+
+  <div class="content-grid">
+    <!-- Add Reminder Form -->
+    <div>
+      <div class="game-card">
+        <h3 class="card-title-game">➕ New Reminder <span style="font-size:0.75rem;color:var(--neon-green);font-family:var(--font-body);">+5 XP</span></h3>
+        <form method="post">
+          {% csrf_token %}
+          {% for field in form %}
+          <div style="margin-bottom:1rem;">
+            <label class="form-label-game">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<ul class="errorlist">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+          {% endfor %}
+          <button type="submit" class="btn-game w-100" style="justify-content:center;">
+            ⏰ Set Reminder (+5 XP)
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Reminders List -->
+    <div>
+      <!-- Upcoming -->
+      <div class="game-card mb-4">
+        <h3 class="card-title-game">🔔 Upcoming Quests</h3>
+        {% if upcoming %}
+          {% for r in upcoming %}
+          <div class="reminder-card {% if r.is_overdue %}overdue{% endif %}">
+            <div style="flex:1;">
+              <div style="font-weight:600;font-size:0.95rem;color:{% if r.is_overdue %}var(--danger){% else %}var(--text-primary){% endif %};">
+                {% if r.is_overdue %}⚠️ {% endif %}{{ r.title }}
+              </div>
+              {% if r.description %}
+                <div style="font-size:0.82rem;color:var(--text-muted);margin-top:0.2rem;">{{ r.description }}</div>
+              {% endif %}
+              <div class="reminder-time">
+                {% if r.is_overdue %}<span style="color:var(--danger);">OVERDUE · </span>{% endif %}
+                {{ r.remind_at|date:"M d, Y · H:i" }}
+              </div>
+            </div>
+            <form method="post" action="{% url 'complete_reminder' r.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn-success-game">✓ Done</button>
+            </form>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state" style="padding:1.5rem;">
+            <div class="empty-icon">🎯</div>
+            <p>No upcoming reminders.<br>Stay ahead of your quests!</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Completed -->
+      {% if completed %}
+      <div class="game-card">
+        <h3 class="card-title-game">✅ Completed Quests</h3>
+        {% for r in completed %}
+        <div class="reminder-card complete">
+          <div style="flex:1;">
+            <div style="font-weight:600;font-size:0.9rem;text-decoration:line-through;color:var(--text-muted);">{{ r.title }}</div>
+            <div class="reminder-time">{{ r.remind_at|date:"M d, Y" }}</div>
+          </div>
+          <span style="color:var(--neon-green);font-size:1.2rem;">✓</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'tracker/base.html' %}
+{% block title %}Notes — Solo Leveling{% endblock %}
+
+{% block content %}
+<div class="container-game fade-in">
+  <h1 class="page-title">📝 Study Notes</h1>
+
+  <div class="content-grid">
+    <!-- Add Note Form -->
+    <div>
+      <div class="game-card">
+        <h3 class="card-title-game">✍️ New Note <span style="font-size:0.75rem;color:var(--neon-green);font-family:var(--font-body);">+10 XP</span></h3>
+        <form method="post">
+          {% csrf_token %}
+          {% for field in form %}
+          <div style="margin-bottom:1rem;">
+            <label class="form-label-game">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<ul class="errorlist">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+          {% endfor %}
+          <button type="submit" class="btn-game w-100" style="justify-content:center;">
+            💾 Save Note (+10 XP)
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Notes List -->
+    <div>
+      {% if notes %}
+        {% for n in notes %}
+        <div class="note-card mb-3 slide-up">
+          {% if n.subject %}<span class="note-subject">{{ n.subject }}</span>{% endif %}
+          <div class="note-title">{{ n.title }}</div>
+          <div class="note-content">{{ n.content|truncatechars:200 }}</div>
+          <div class="note-meta" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>{{ n.created_at|date:"M d, Y · H:i" }}</span>
+            <div style="display:flex;gap:0.5rem;">
+              <a href="{% url 'edit_note' n.id %}" class="btn-game-outline" style="font-size:0.75rem;padding:0.25rem 0.6rem;">✏️ Edit</a>
+              <form method="post" action="{% url 'delete_note' n.id %}" style="display:inline;" onsubmit="return confirm('Delete this note?')">
+                {% csrf_token %}
+                <button type="submit" class="btn-danger-game" style="font-size:0.75rem;padding:0.25rem 0.6rem;">🗑️</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="game-card">
+          <div class="empty-state">
+            <div class="empty-icon">📝</div>
+            <p>No notes yet. Start writing your study notes!</p>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

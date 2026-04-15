@@ -1,0 +1,175 @@
+{% extends 'tracker/base.html' %}
+{% block title %}Analytics — Solo Leveling{% endblock %}
+
+{% block content %}
+<div class="container-game fade-in">
+  <h1 class="page-title">📊 Analytics Dashboard</h1>
+
+  <!-- Overview Stats -->
+  <div class="dashboard-grid mb-4">
+    <div class="stat-card">
+      <span class="stat-value">{{ overall_avg }}%</span>
+      <div class="stat-label">Overall Average</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ total_entries }}</span>
+      <div class="stat-label">Total Entries</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ strong_subjects|length }}</span>
+      <div class="stat-label">Strong Subjects</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ weak_subjects|length }}</span>
+      <div class="stat-label">Needs Work</div>
+    </div>
+  </div>
+
+  <div class="content-grid mb-4">
+    <!-- Strong Subjects -->
+    <div class="game-card">
+      <h3 class="card-title-game">🏆 Strong Subjects (≥80%)</h3>
+      {% if strong_subjects %}
+        {% for s in strong_subjects %}
+        <div style="margin-bottom:0.75rem;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;">
+            <span style="font-weight:600;font-size:0.9rem;">{{ s.subject }}</span>
+            <span style="color:var(--neon-green);font-weight:700;">{{ s.avg|floatformat:1 }}%</span>
+          </div>
+          <div class="pct-bar"><div class="pct-fill high" style="width:{{ s.avg }}%;"></div></div>
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.2rem;">
+            Best: {{ s.best|floatformat:1 }}% · {{ s.count }} records
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state" style="padding:1.5rem;">
+          <p>Keep studying to unlock strong subjects!</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Weak Subjects -->
+    <div class="game-card">
+      <h3 class="card-title-game">⚠️ Needs Improvement (&lt;60%)</h3>
+      {% if weak_subjects %}
+        {% for s in weak_subjects %}
+        <div style="margin-bottom:0.75rem;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;">
+            <span style="font-weight:600;font-size:0.9rem;">{{ s.subject }}</span>
+            <span style="color:var(--danger);font-weight:700;">{{ s.avg|floatformat:1 }}%</span>
+          </div>
+          <div class="pct-bar"><div class="pct-fill low" style="width:{{ s.avg }}%;"></div></div>
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.2rem;">
+            Best: {{ s.best|floatformat:1 }}% · Worst: {{ s.worst|floatformat:1 }}%
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state" style="padding:1.5rem;">
+          <p>🎉 No weak subjects! Excellent work!</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Full Subject Breakdown -->
+  {% if subject_stats %}
+  <div class="game-card mb-4">
+    <h3 class="card-title-game">📈 Full Subject Breakdown</h3>
+    <div style="overflow-x:auto;">
+      <table class="game-table">
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th>Average</th>
+            <th>Best</th>
+            <th>Worst</th>
+            <th>Entries</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in subject_stats %}
+          <tr>
+            <td><strong>{{ s.subject }}</strong></td>
+            <td>
+              <span style="color:{% if s.avg >= 80 %}var(--neon-green){% elif s.avg >= 60 %}var(--gold){% else %}var(--danger){% endif %};font-weight:700;">
+                {{ s.avg|floatformat:1 }}%
+              </span>
+            </td>
+            <td style="color:var(--neon-green);">{{ s.best|floatformat:1 }}%</td>
+            <td style="color:var(--danger);">{{ s.worst|floatformat:1 }}%</td>
+            <td>{{ s.count }}</td>
+            <td>
+              {% if s.avg >= 80 %}
+                <span style="color:var(--neon-green);font-size:0.8rem;">🏆 Excellent</span>
+              {% elif s.avg >= 60 %}
+                <span style="color:var(--gold);font-size:0.8rem;">📈 Good</span>
+              {% else %}
+                <span style="color:var(--danger);font-size:0.8rem;">⚠️ Needs Work</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Grade Distribution -->
+  {% if grade_dist %}
+  <div class="game-card mb-4">
+    <h3 class="card-title-game">🎯 Grade Distribution</h3>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+      {% for grade, count in grade_dist.items %}
+      <div style="flex:1;min-width:80px;text-align:center;padding:1rem;background:var(--bg-glass);border:1px solid var(--border);border-radius:10px;">
+        <span class="grade-badge grade-{% if grade == 'A+' %}Aplus{% else %}{{ grade }}{% endif %}" style="font-size:1.1rem;padding:0.3rem 0.9rem;">{{ grade }}</span>
+        <div style="font-family:var(--font-display);font-size:1.8rem;color:var(--text-primary);margin-top:0.5rem;">{{ count }}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">times</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Marks Timeline -->
+  {% if marks_timeline %}
+  <div class="game-card">
+    <h3 class="card-title-game">📅 Performance Timeline</h3>
+    <div style="overflow-x:auto;">
+      <table class="game-table">
+        <thead>
+          <tr><th>Date</th><th>Subject</th><th>Percentage</th><th>Grade</th></tr>
+        </thead>
+        <tbody>
+          {% for m in marks_timeline %}
+          <tr>
+            <td style="color:var(--text-muted);font-size:0.85rem;">{{ m.date_added|date:"M d, Y" }}</td>
+            <td>{{ m.subject }}</td>
+            <td>
+              <span style="color:{% if m.percentage >= 80 %}var(--neon-green){% elif m.percentage >= 60 %}var(--gold){% else %}var(--danger){% endif %};font-weight:700;">
+                {{ m.percentage|floatformat:1 }}%
+              </span>
+            </td>
+            <td><span class="grade-badge grade-{% if m.grade == 'A+' %}Aplus{% else %}{{ m.grade }}{% endif %}">{{ m.grade }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if not total_entries %}
+  <div class="game-card">
+    <div class="empty-state">
+      <div class="empty-icon">📊</div>
+      <p>No data yet! Start recording your marks to see analytics.</p>
+      <a href="{% url 'add_marks' %}" class="btn-game mt-3">➕ Record Marks</a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
